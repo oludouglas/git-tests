@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"net/http"
 	"os"
 
@@ -9,12 +10,9 @@ import (
 
 func main() {
 
-	handler := gin.New()
-	handler.GET("/", func(ctx *gin.Context) {
-		ctx.JSON(200, map[string]any{
-			"status": "OK",
-		})
-	})
+	handler := gin.Default()
+	handler.GET("/", indexPage)
+	handler.GET("/audio/stream", streamAudio)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -22,4 +20,24 @@ func main() {
 	}
 	http.ListenAndServe(":"+port, handler)
 
+}
+
+func indexPage(ctx *gin.Context) {
+	ctx.JSON(200, map[string]any{
+		"status": "OK",
+	})
+}
+
+func indexstreamAudioPage(ctx *gin.Context) {
+	f, err := os.Open("audio.mp3")
+	if err != nil {
+		ctx.Status(500)
+		return
+	}
+	defer f.Close()
+
+	ctx.Stream(func(w io.Writer) bool {
+		_, err := io.Copy(w, f)
+		return err == nil
+	})
 }
