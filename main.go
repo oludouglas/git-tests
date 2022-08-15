@@ -9,12 +9,8 @@ import (
 
 func main() {
 
-	handler := gin.New()
-	handler.GET("/", func(ctx *gin.Context) {
-		ctx.JSON(200, map[string]any{
-			"status": "OK",
-		})
-	})
+	handler := gin.Default()
+	handler.GET("/", indexPage)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -22,4 +18,10 @@ func main() {
 	}
 	http.ListenAndServe(":"+port, handler)
 
+}
+
+func indexPage(ctx *gin.Context) {
+	ctx.JSON(200, map[string]any{
+		"status": "OK",
+	})
 }
